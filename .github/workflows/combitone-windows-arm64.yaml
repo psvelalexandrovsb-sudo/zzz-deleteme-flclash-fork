@@ -1,0 +1,77 @@
+name: combitone-windows-arm64
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.1'
+  GO_VERSION: '1.26.4'
+
+jobs:
+  build:
+    name: Windows arm64
+    runs-on: windows-11-arm
+    steps:
+      - name: Setup rust
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile rustup-init.exe
+          .\rustup-init.exe -y --default-toolchain stable
+          $cargoPath = "$env:USERPROFILE\.cargo\bin"
+          Add-Content $env:GITHUB_PATH $cargoPath
+
+      - name: Enable git long paths
+        run: git config --global core.longpaths true
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: windows-arm64
+          workspaces: services/helper
+          cache-directories: .dart_tool/hooks_runner
+
+      # Stable publishes no Windows arm64 archive; master makes the action
+      # clone the SDK at the pinned tag and fetch the host's own Dart SDK.
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: master
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Get Flutter Dependency
+        run: |
+          flutter --version
+          flutter pub get
+
+      - name: Build and package
+        run: dart setup.dart windows --env stable -v
+
+      - name: List dist
+        shell: pwsh
+        run: Get-ChildItem dist | Format-Table Name, Length
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: combitone-windows-arm64
+          path: ./dist
+          overwrite: true

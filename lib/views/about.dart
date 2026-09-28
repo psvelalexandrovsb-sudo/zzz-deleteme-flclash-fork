@@ -48,16 +48,23 @@ class AboutView extends ConsumerWidget {
           },
         ),
         ListItem(
-          title: const Text('Telegram'),
+          title: const Text('Исходный код Combitone'),
           onTap: () {
-            dialogs.openUrl('https://t.me/FlClash');
+            dialogs.openUrl('https://github.com/$repository');
           },
           trailing: const Icon(Icons.launch),
         ),
         ListItem(
-          title: Text(appLocalizations.project),
+          title: const Text('Оригинальный проект FlClash'),
           onTap: () {
-            dialogs.openUrl('https://github.com/$repository');
+            dialogs.openUrl('https://github.com/$upstreamRepository');
+          },
+          trailing: const Icon(Icons.launch),
+        ),
+        ListItem(
+          title: const Text('Лицензия GPL-3.0'),
+          onTap: () {
+            dialogs.openUrl('https://www.gnu.org/licenses/gpl-3.0.html');
           },
           trailing: const Icon(Icons.launch),
         ),
@@ -160,6 +167,13 @@ class AboutView extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               appLocalizations.desc,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Combitone для Windows — модифицированная версия FlClash '
+              '(© chen08209) на ядре mihomo. Распространяется на условиях '
+              'GNU GPL-3.0; исходный код доступен по ссылкам ниже.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],

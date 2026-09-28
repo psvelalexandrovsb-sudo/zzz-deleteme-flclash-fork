@@ -1,3 +1,9 @@
+> **Combitone fork.** This repository is a modified version of
+> [FlClash](https://github.com/chen08209/FlClash) by chen08209, rebranded as
+> *Combitone* with a phone/password sign-in that imports the user's Combitone
+> subscription. Changes are listed in the git history of this fork. Licensed
+> under GPL-3.0, like the original (see [LICENSE](LICENSE)).
+
 <div>
 
 [**简体中文**](README_zh_CN.md)

@@ -1,11 +1,9 @@
 name: build
 
+# Combitone fork: upstream CI/release pipeline is kept for reference and only
+# runs manually; Windows arm64 builds live in combitone-windows-arm64.yaml.
 on:
-  push:
-    branches:
-      - '**'
-    tags:
-      - 'v*'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

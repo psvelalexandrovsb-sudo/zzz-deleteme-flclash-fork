@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/pages/scan.dart';
-import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'combitone_login.dart';
 
 class AddProfileView extends ConsumerWidget {
   final BuildContext context;
@@ -14,6 +17,29 @@ class AddProfileView extends ConsumerWidget {
 
   Future<void> _handleAddProfileFormFile(WidgetRef ref) async {
     unawaited(ref.read(profilesActionProvider.notifier).addProfileFormFile());
+  }
+
+  Future<void> _toCombitoneLogin(WidgetRef ref) async {
+    final url = await dialogs.showCommonDialog<String>(
+      child: const CombitoneLoginDialog(),
+    );
+    if (url == null) return;
+    final profilesAction = ref.read(profilesActionProvider.notifier);
+    final existing = ref
+        .read(profilesProvider)
+        .where((profile) => profile.url.startsWith(combitoneApiBase))
+        .firstOrNull;
+    if (existing == null) {
+      unawaited(profilesAction.addProfileFormURL(url));
+      return;
+    }
+    globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    await globalState.safeRun(
+      () => profilesAction.updateProfile(
+        existing.copyWith(url: url),
+        showLoading: true,
+      ),
+    );
   }
 
   Future<void> _toScan(WidgetRef ref) async {
@@ -61,6 +87,14 @@ class AddProfileView extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     return ListView(
       children: [
+        ListItem(
+          leading: const Icon(Icons.login),
+          title: const Text('Войти в Combitone'),
+          subtitle: const Text(
+            'По телефону и паролю — серверы подключатся сами',
+          ),
+          onTap: () => _toCombitoneLogin(ref),
+        ),
         ListItem(
           leading: const Icon(Icons.qr_code_sharp),
           title: Text(appLocalizations.qrcode),
